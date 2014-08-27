@@ -176,7 +176,7 @@ void chip8_step(struct chip8_context *ctx)
                 x = ctx->regs.V[instrBE & 0xF],
                 y = ctx->regs.V[(instr>>4) & 0xF];
             for (i = 0; i < n; i++) {
-               //printf("drawing 0x%02X to x: 0x%02X  y: 0x%02X\n",ctx->RAM[ctx->regs.I+i], x/8, y);
+                //printf("drawing 0x%02X to x: 0x%02X  y: 0x%02X\n",ctx->RAM[ctx->regs.I+i], x/8, y);
                 uint8_t disp_idx = x/8 + (ctx->disp_w/8)*(y+i);
                 uint16_t RAM_idx = ctx->regs.I+i;
                 ctx->regs.V[0xF] |=

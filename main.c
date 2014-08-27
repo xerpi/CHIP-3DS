@@ -9,9 +9,26 @@
 
 SDL_Surface *CreateSurface(Uint32 flags, int w, int h, const SDL_Surface* disp);
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc < 2) {
+        printf("Usage: ./CHIP-3DS rom\n");
+        return -1;
+    }
+
     srand(time(NULL));
+    printf("Chip-3DS by xerpi\n");
+    printf("Loading \"%s\"...", argv[1]);
+    struct chip8_context chip8;
+    chip8_init(&chip8, 64, 32);
+    int ret = chip8_loadrom(&chip8, argv[1]);
+    if (ret) printf("OK!\n");
+    else {
+        printf("ERROR.\n");
+        chip8_fini(&chip8);
+        return -1;
+    }
+    printf("Running \"%s\"...\n", argv[1]);
     
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window *window = SDL_CreateWindow("Chip-3DS",
@@ -24,20 +41,6 @@ int main()
     SDL_Surface *chip8_disp = CreateSurface(SDL_SWSURFACE, 64, 32, screen);
     SDL_Event event;
     int running = 1;
-    
-    #define ROM "PONG"
-    printf("Chip-3DS\n");
-    printf("Loading '" ROM "'...");
-    struct chip8_context chip8;
-    chip8_init(&chip8, 64, 32);
-    int ret = chip8_loadrom(&chip8, ROM);
-    if (ret) printf("OK!\n");
-    else {
-        printf("ERROR.\n");
-        chip8_fini(&chip8);
-        return -1;
-    }
-    printf("Running '" ROM "'...\n");
     
     while (running) {
         while (SDL_PollEvent(&event) != 0) {
