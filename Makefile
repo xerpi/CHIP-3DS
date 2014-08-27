@@ -1,5 +1,5 @@
-TARGET = Chip-3DS
-OBJS = main.o chip-3ds.o
+TARGET = CHIP-3DS
+OBJS = main.o utils.o chip-8.o
 
 CC = gcc
 CFLAGS = -O2 -Wall

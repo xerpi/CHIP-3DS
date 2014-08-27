@@ -1,4 +1,4 @@
-#include "chip-3ds.h"
+#include "chip-8.h"
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
@@ -17,15 +17,15 @@ static const uint8_t chip8_font[] = {
     0xF0, 0x80, 0xF0, 0x80, 0xF0, 0xF0, 0x80, 0xF0, 0x80, 0x80
 };
 
-void chip3ds_init(struct chip3ds_context *ctx, uint8_t display_w, uint8_t display_h)
+void chip8_init(struct chip8_context *ctx, uint8_t display_w, uint8_t display_h)
 {
     ctx->disp_mem = malloc((display_w * display_h)/8);
     ctx->disp_w = display_w;
     ctx->disp_h = display_h;
-    chip3ds_reset(ctx);
+    chip8_reset(ctx);
 }
 
-void chip3ds_reset(struct chip3ds_context *ctx)
+void chip8_reset(struct chip8_context *ctx)
 {
     memset(ctx->RAM,   0, sizeof(ctx->RAM));
     memcpy(ctx->RAM+FONT_OFFSET, chip8_font, sizeof(chip8_font));
@@ -34,17 +34,17 @@ void chip3ds_reset(struct chip3ds_context *ctx)
     ctx->regs.PC = 0x200;
     ctx->regs.SP = 0;
     ctx->keyboard = 0;
-    chip3ds_cls(ctx);
+    chip8_cls(ctx);
     ctx->ticks = 0;
 };
 
-void chip3ds_fini(struct chip3ds_context *ctx)
+void chip8_fini(struct chip8_context *ctx)
 {
     if (ctx->disp_mem)
         free(ctx->disp_mem);
 }
 
-void chip3ds_step(struct chip3ds_context *ctx)
+void chip8_step(struct chip8_context *ctx)
 {
     uint16_t instrBE = ctx->RAM[ctx->regs.PC+1]<<8 | ctx->RAM[ctx->regs.PC];
     uint16_t instr = (instrBE & 0xFF)<<8 | (instrBE>>8);
@@ -57,7 +57,7 @@ void chip3ds_step(struct chip3ds_context *ctx)
             switch (instr & 0xFF) {
         /* CLS */
             case 0xE0:
-                chip3ds_cls(ctx);
+                chip8_cls(ctx);
                 break;
         /* RET */
             case 0xEE:
@@ -195,7 +195,7 @@ void chip3ds_step(struct chip3ds_context *ctx)
                 break;
         /* SKNP */
             case 0xA1:
-                if ((ctx->keyboard>>ctx->regs.V[instrBE & 0xF]) & ~0b1) {
+                if (!((ctx->keyboard>>ctx->regs.V[instrBE & 0xF]) & 0b1)) {
                     ctx->regs.PC+=2;
                 }
                 break;
@@ -209,7 +209,7 @@ void chip3ds_step(struct chip3ds_context *ctx)
                 break;
         /* LD KEY */
             case 0x0A: {
-                uint16_t new_pressed = (ctx->keyboard ^ ctx->keyboard) & ctx->keyboard;
+                uint16_t new_pressed = (ctx->keyboard ^ ctx->old_keyboard) & ctx->keyboard;
                 if (new_pressed) {
                     ctx->regs.V[instrBE & 0xF] = ffs(new_pressed);
                 } else {
@@ -231,8 +231,6 @@ void chip3ds_step(struct chip3ds_context *ctx)
                 break;
         /* LD sprite */
             case 0x29:
-                printf("setting font n %i\n", ctx->regs.V[instrBE & 0xF]);
-                printf("instrBE: 0x%04X\ninstr: 0x%04X\n", instrBE, instr);
                 ctx->regs.I = FONT_OFFSET+ctx->regs.V[instrBE & 0xF]*5;
                 break;
         /* LD BCD */
@@ -270,24 +268,28 @@ void chip3ds_step(struct chip3ds_context *ctx)
 }
 
 
-void chip3ds_cls(struct chip3ds_context *ctx)
+void chip8_cls(struct chip8_context *ctx)
 {
     memset(ctx->disp_mem, 0, (ctx->disp_w * ctx->disp_h)/8);
 }
 
-void chip3ds_key_press(struct chip3ds_context *ctx, uint8_t key)
+void chip8_key_press(struct chip8_context *ctx, uint8_t key)
 {
-    if (key < 16)
+    if (key < 16 && !(ctx->keyboard & (1<<key))) {
+        ctx->old_keyboard = ctx->keyboard;
         ctx->keyboard |= (1<<key);
+    }
 }
 
-void chip3ds_key_release(struct chip3ds_context *ctx, uint8_t key)
+void chip8_key_release(struct chip8_context *ctx, uint8_t key)
 {
-    if (key < 16)
+    if (key < 16 && (ctx->keyboard & (1<<key))) {
+        ctx->old_keyboard = ctx->keyboard;
         ctx->keyboard &= ~(1<<key);
+    }
 }
 
-int chip3ds_loadrom(struct chip3ds_context *ctx, char *path)
+int chip8_loadrom(struct chip8_context *ctx, char *path)
 {
     FILE *fp = fopen(path, "rb");
     if (!fp) return 0;
@@ -299,7 +301,7 @@ int chip3ds_loadrom(struct chip3ds_context *ctx, char *path)
     return (size == read);
 }
 
-void chip3ds_core_dump(struct chip3ds_context *ctx)
+void chip8_core_dump(struct chip8_context *ctx)
 {
     printf("Registers:\n");
     printf("  V0: 0x%02X  V1: 0x%02X  V2: 0x%02X  V3: 0x%02X\n",

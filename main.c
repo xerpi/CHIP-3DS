@@ -4,9 +4,9 @@
 #include <time.h>
 #include <strings.h>
 #include <SDL2/SDL.h>
-#include "chip-3ds.h"
+#include "chip-8.h"
+#include "utils.h"
 
-void chip3ds_disp_to_SDL(struct chip3ds_context *ctx, SDL_Surface *disp);
 SDL_Surface *CreateSurface(Uint32 flags, int w, int h, const SDL_Surface* disp);
 
 int main()
@@ -28,13 +28,13 @@ int main()
     #define ROM "PONG"
     printf("Chip-3DS\n");
     printf("Loading '" ROM "'...");
-    struct chip3ds_context chip3ds;
-    chip3ds_init(&chip3ds, 64, 32);
-    int ret = chip3ds_loadrom(&chip3ds, ROM);
+    struct chip8_context chip8;
+    chip8_init(&chip8, 64, 32);
+    int ret = chip8_loadrom(&chip8, ROM);
     if (ret) printf("OK!\n");
     else {
         printf("ERROR.\n");
-        chip3ds_fini(&chip3ds);
+        chip8_fini(&chip8);
         return -1;
     }
     printf("Running '" ROM "'...\n");
@@ -51,43 +51,57 @@ int main()
                         running = 0;
                         break;
                     case SDLK_w:
-                        chip3ds_key_press(&chip3ds, 7);
+                        chip8_key_press(&chip8, 1);
                         break;
                     case SDLK_s:
-                        chip3ds_key_press(&chip3ds, 4);
+                        chip8_key_press(&chip8, 4);
+                        break;
+                    case SDLK_UP:
+                        chip8_key_press(&chip8, 0xC);
+                        break;
+                    case SDLK_DOWN:
+                        chip8_key_press(&chip8, 0xD);
+                        break;
+                }
+                break;
+            case SDL_KEYUP:
+                switch (event.key.keysym.sym) {
+                    case SDLK_q:
+                        running = 0;
+                        break;
+                    case SDLK_w:
+                        chip8_key_release(&chip8, 1);
+                        break;
+                    case SDLK_s:
+                        chip8_key_release(&chip8, 4);
+                        break;
+                    case SDLK_UP:
+                        chip8_key_release(&chip8, 0xC);
+                        break;
+                    case SDLK_DOWN:
+                        chip8_key_release(&chip8, 0xD);
                         break;
                 }
                 break;
             }
         }
         
-        chip3ds_step(&chip3ds);
-        //chip3ds_core_dump(&chip3ds);
+        chip8_step(&chip8);
+        //chip8_core_dump(&chip8);
         //usleep(16667);
 
-        chip3ds_disp_to_SDL(&chip3ds, chip8_disp);
+        chip8_disp_to_SDL(&chip8, chip8_disp);
         SDL_BlitScaled(chip8_disp, NULL, screen, NULL);
         SDL_UpdateWindowSurface(window);
     }
     
-    chip3ds_fini(&chip3ds);
+    chip8_fini(&chip8);
     SDL_FreeSurface(chip8_disp);
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
 }
 
-void chip3ds_disp_to_SDL(struct chip3ds_context *ctx, SDL_Surface *disp)
-{
-    int x, y;
-    for (y = 0; y < disp->clip_rect.h; y++) {
-        for (x = 0; x < disp->clip_rect.w; x++) {
-            *(unsigned int*)(disp->pixels + y * disp->pitch + x*4) = //ARGB
-                ((ctx->disp_mem[x/8 + (ctx->disp_w/8)*y]>>(7-x%8)) & 0b1) ? 0xFFFFFFFF : 0xFF000000;
-        } 
-    }
-    
-}
 
 
 SDL_Surface *CreateSurface(Uint32 flags, int w, int h, const SDL_Surface* disp)
