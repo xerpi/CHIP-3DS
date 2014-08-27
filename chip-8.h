@@ -25,8 +25,6 @@ struct chip8_context {
     uint8_t *disp_mem;
     uint8_t disp_w;
     uint8_t disp_h;
-    
-    unsigned long long ticks;
 };
 
 void chip8_init(struct chip8_context *ctx, uint8_t display_w, uint8_t display_h);

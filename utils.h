@@ -10,6 +10,7 @@ extern "C" {
 #endif
 
 void chip8_disp_to_SDL(struct chip8_context *ctx, SDL_Surface *disp);
+void print_bin(uint8_t n);
 
 
 #ifdef __cplusplus
