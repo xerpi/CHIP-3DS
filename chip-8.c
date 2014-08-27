@@ -51,8 +51,9 @@ void chip8_step(struct chip8_context *ctx)
 
     #define OP_REG_X   (instrBE & 0xF)
     #define OP_REG_Y   ((instr>>4) & 0xF)
-    #define CTX_REG_X  (ctx->regs.V[OP_REG_X])
-    #define CTX_REG_Y  (ctx->regs.V[OP_REG_Y])
+    #define CTX_REG_V  (ctx->regs.V)
+    #define CTX_REG_X  (CTX_REG_V[OP_REG_X])
+    #define CTX_REG_Y  (CTX_REG_V[OP_REG_Y])
     #define CTX_REG_PC (ctx->regs.PC)
     #define CTX_REG_SP (ctx->regs.SP)
     #define CTX_STACK  (ctx->stack)
@@ -96,7 +97,7 @@ void chip8_step(struct chip8_context *ctx)
             break;
     /* SE */
         case 5:
-            if (CTX_REG_X == ctx->regs.V[(OP_REG_Y)]) {
+            if (CTX_REG_X == CTX_REG_V[OP_REG_Y]) {
                 CTX_REG_PC+=2;
             }
             break;
@@ -130,30 +131,30 @@ void chip8_step(struct chip8_context *ctx)
             case 4: {
                 uint16_t result = CTX_REG_X + CTX_REG_Y;
                 CTX_REG_X = result & 0xFF;
-                ctx->regs.V[0xF] = (result > 0xFF);
+                CTX_REG_V[0xF] = (result > 0xFF);
                 break;
             }
         /* SUB */
             case 5: {
                 int8_t result = CTX_REG_X - CTX_REG_Y;
                 CTX_REG_X = result;
-                ctx->regs.V[0xF] = (result > 0);
+                CTX_REG_V[0xF] = (result > 0);
                 break;
             }
         /* SHR */
             case 6:
-                ctx->regs.V[0xF] = (CTX_REG_Y & 0x1);
+                CTX_REG_V[0xF] = (CTX_REG_Y & 0x1);
                 CTX_REG_X = CTX_REG_Y>>1;
         /* SUBN */
             case 7: {
                 int8_t result = CTX_REG_Y - CTX_REG_X;
                 CTX_REG_X = result;
-                ctx->regs.V[0xF] = (result > 0);
+                CTX_REG_V[0xF] = (result > 0);
                 break;
             }
         /* SHL */
             case 0xE:
-                ctx->regs.V[0xF] = ((CTX_REG_Y>>7) & 0x1);
+                CTX_REG_V[0xF] = ((CTX_REG_Y>>7) & 0x1);
                 CTX_REG_X = CTX_REG_Y<<1;
                 break;
             }
@@ -170,7 +171,7 @@ void chip8_step(struct chip8_context *ctx)
             break;
     /* JP V0 */
         case 0xB:
-            CTX_REG_PC = ctx->regs.V[0] + (instr & 0xFFF);
+            CTX_REG_PC = CTX_REG_V[0] + (instr & 0xFFF);
             break;
     /* RND */
         case 0xC:
@@ -185,8 +186,8 @@ void chip8_step(struct chip8_context *ctx)
                 uint8_t disp_idx = x/8 + (ctx->disp_w/8)*(y+i);
                 uint16_t RAM_idx = ctx->regs.I+i;
                 uint8_t offset = x%8;
-                ctx->regs.V[0xF] |= (ctx->disp_mem[disp_idx] ^ (CTX_RAM[RAM_idx]>>offset)) & ctx->disp_mem[disp_idx];
-                ctx->regs.V[0xF] |= (ctx->disp_mem[disp_idx+1] ^ (CTX_RAM[RAM_idx]<<(8-offset))) & ctx->disp_mem[disp_idx+1];
+                CTX_REG_V[0xF] |= (ctx->disp_mem[disp_idx] ^ (CTX_RAM[RAM_idx]>>offset)) & ctx->disp_mem[disp_idx];
+                CTX_REG_V[0xF] |= (ctx->disp_mem[disp_idx+1] ^ (CTX_RAM[RAM_idx]<<(8-offset))) & ctx->disp_mem[disp_idx+1];
                 
                 ctx->disp_mem[disp_idx] ^= (CTX_RAM[RAM_idx]>>offset);
                 ctx->disp_mem[disp_idx+1] ^= (CTX_RAM[RAM_idx]<<(8-offset));
@@ -252,20 +253,20 @@ void chip8_step(struct chip8_context *ctx)
         /* LD mpoke */
             case 0x55: {
                 int i;
-                for (i = 0; i <= (OP_REG_X); i++) {
-                    CTX_RAM[ctx->regs.I+i] = ctx->regs.V[i];
+                for (i = 0; i <= OP_REG_X; i++) {
+                    CTX_RAM[ctx->regs.I+i] = CTX_REG_V[i];
                 }
-                ctx->regs.I += (OP_REG_X)+1;
+                ctx->regs.I += OP_REG_X+1;
                 break;
             }
         /* LD mpeek */
             case 0x65: {
                 int i;
-                for (i = 0; i <= (OP_REG_X); i++) {
-                    ctx->regs.V[i] = CTX_RAM[ctx->regs.I+i];
+                for (i = 0; i <= OP_REG_X; i++) {
+                    CTX_REG_V[i] = CTX_RAM[ctx->regs.I+i];
                 }
                 break;
-                ctx->regs.I += (OP_REG_X)+1;
+                ctx->regs.I += OP_REG_X+1;
             }
             break;
         }
