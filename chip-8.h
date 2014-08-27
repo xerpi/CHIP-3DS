@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct chip8_context {
     struct {
         uint8_t  V[16];
@@ -35,6 +39,8 @@ void chip8_key_release(struct chip8_context *ctx, uint8_t key);
 int  chip8_loadrom(struct chip8_context *ctx, char *path);
 void chip8_core_dump(struct chip8_context *ctx);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

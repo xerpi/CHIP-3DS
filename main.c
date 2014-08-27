@@ -53,6 +53,10 @@ int main(int argc, char *argv[])
                     case SDLK_q:
                         running = 0;
                         break;
+                    case SDLK_r:
+                        chip8_reset(&chip8);
+                        chip8_loadrom(&chip8, argv[1]);
+                        break;
                     case SDLK_w:
                         chip8_key_press(&chip8, 1);
                         break;
@@ -90,6 +94,20 @@ int main(int argc, char *argv[])
         }
         
         chip8_step(&chip8);
+        /*int x, y;
+        for (y = 0; y < 32; y++) {
+            for (x = 0; x < 8; x++) {
+                int i;
+                for (i = 0; i < 8; i++) {
+                    printf("%c", (chip8.disp_mem[x+y*8]>>(7-i))&0b1 ? 'X' : 'O');
+                }
+                printf(" ");
+            }
+            printf("\n");
+        }
+        printf("\n\n");
+        */
+        
         //chip8_core_dump(&chip8);
         //usleep(16667);
 

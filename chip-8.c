@@ -5,6 +5,14 @@
 #include <strings.h>
 
 
+void print_bin(uint8_t n)
+{
+    int i;
+    for (i = 0; i < 8; i++) {
+        printf("%c", (n>>(7-i))&0b1 ? 'x' : 'o');
+    }
+}
+
 #define FONT_OFFSET 0
 static const uint8_t chip8_font[] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70,
@@ -176,12 +184,14 @@ void chip8_step(struct chip8_context *ctx)
                 x = ctx->regs.V[instrBE & 0xF],
                 y = ctx->regs.V[(instr>>4) & 0xF];
             for (i = 0; i < n; i++) {
-                //printf("drawing 0x%02X to x: 0x%02X  y: 0x%02X\n",ctx->RAM[ctx->regs.I+i], x/8, y);
                 uint8_t disp_idx = x/8 + (ctx->disp_w/8)*(y+i);
                 uint16_t RAM_idx = ctx->regs.I+i;
-                ctx->regs.V[0xF] |=
-                    ((ctx->disp_mem[disp_idx] ^ ctx->RAM[RAM_idx]) & ctx->disp_mem[disp_idx]) ? 0b1 : 0b0;
-                ctx->disp_mem[disp_idx] ^= ctx->RAM[RAM_idx];
+                uint8_t offset = x%8;
+                ctx->regs.V[0xF] |= (ctx->disp_mem[disp_idx] ^ (ctx->RAM[RAM_idx]>>offset)) & ctx->disp_mem[disp_idx];
+                ctx->regs.V[0xF] |= (ctx->disp_mem[disp_idx+1] ^ (ctx->RAM[RAM_idx]<<(8-offset))) & ctx->disp_mem[disp_idx+1];
+                
+                ctx->disp_mem[disp_idx] ^= (ctx->RAM[RAM_idx]>>offset);
+                ctx->disp_mem[disp_idx+1] ^= (ctx->RAM[RAM_idx]<<(8-offset));
             }
             break;
         }
