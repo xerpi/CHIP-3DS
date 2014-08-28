@@ -9,7 +9,6 @@
 extern "C" {
 #endif
 
-//void chip8_disp_to_SDL(struct chip8_context *ctx, SDL_Surface *disp);
 int chip8_loadrom(struct chip8_context *ctx, char *path);
 int chip8_loadrom_memory(struct chip8_context *ctx, void *addr, unsigned int size);
 void print_bin(uint8_t n);
