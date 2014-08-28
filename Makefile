@@ -9,24 +9,27 @@ OBJCOPY = $(DEVKITARM)/bin/arm-none-eabi-objcopy
 BIN2S   = $(DEVKITARM)/bin/bin2s
 CFLAGS  = -Wall -std=c99 -march=armv6 -O3 -I"$(CTRULIB)/include"
 LDFLAGS = -nostartfiles -nostdlib -T ccd00.ld -L"$(DEVKITARM)/arm-none-eabi/lib" -L"$(CTRULIB)/lib"
-LIBS    = -lctru -lm
+LIBS    = -lctru -lc -lm
 
-all: $(TARGET).3ds
-
+ELF    := $(TARGET).elf
 CCI    := $(TARGET).3ds
+CXI    := $(TARGET).cxi
+CIA    := $(TARGET).cia
 RSF    := $(TARGET).rsf
 ICON   := $(TARGET).icn
 BANNER := $(TARGET).bnr
 ROMFS  := $(TARGET).romfs
 
-$(TARGET).3ds: $(TARGET).elf
+all: $(CCI) $(CIA)
+
+$(ELF): $(OBJS)
+	$(CC) $(LDFLAGS) $(filter-out crt0.o, $^) -o $@ $(LIBS)
+$(CCI): $(ELF)
 	$(MAKEROM) -f cci -o $(CCI) -rsf $(RSF) -target d -exefslogo -elf $(TARGET).elf # -icon $(ICON) -banner $(BANNER)
-
-$(TARGET).bin: $(TARGET).elf
-	$(OBJCOPY) -O binary $< $@
-
-$(TARGET).elf: $(OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@ $(LIBS)
+$(CXI): $(ELF)
+	$(MAKEROM) -elf $(TARGET).elf -rsf $(RSF)
+$(CIA): $(CXI)
+	$(MAKEROM) -f cia -content $(CXI):0:0 -o $(CIA)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -36,4 +39,4 @@ $(TARGET).elf: $(OBJS)
 	$(BIN2S) $< > $@
 
 clean:
-	@rm -rf $(OBJS) $(TARGET).3ds $(TARGET).elf $(TARGET).bin PONG2.s
+	@rm -rf $(OBJS) $(ELF) $(CCI) $(CXI) $(CIA)

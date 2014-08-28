@@ -1,6 +1,7 @@
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_start)
+STARTUP(crt0.o)
 
 MEMORY {
 
@@ -20,11 +21,11 @@ PHDRS
 
 SECTIONS
 {
-	.init	: ALIGN(0x1000)
+	.init	:
 	{
 		__text_start = . ;
 		KEEP (*(.init))
-		/*. = ALIGN(4);   REQUIRED. LD is flaky without it. */
+		. = ALIGN(4);  /* REQUIRED. LD is flaky without it. */
 	} >memregion :text
 		
 	.plt : 
@@ -32,7 +33,7 @@ SECTIONS
 		*(.plt) 
 	} >memregion = 0xff
 
-	.text :   ALIGN (0x1000)
+	.text :   /* ALIGN (4): */
 	{
 
 		*(.text*)
@@ -42,7 +43,7 @@ SECTIONS
 		*(.gnu.linkonce.t*)
 		*(.glue_7)
 		*(.glue_7t)
-		/*. = ALIGN(4);   REQUIRED. LD is flaky without it. */
+		. = ALIGN(4);  /* REQUIRED. LD is flaky without it. */
 	} >memregion
 
 	.fini           :
@@ -84,7 +85,7 @@ SECTIONS
 	.fini_array     : { KEEP (*(.fini_array)) } >memregion = 0xff
 	PROVIDE (__fini_array_end = .);
 
-	.ctors : ALIGN(0x1000)
+	.ctors :
 	{
 	/* gcc uses crtbegin.o to find the start of the constructors, so
 		we make sure it is first.  Because this is a wildcard, it
@@ -96,28 +97,28 @@ SECTIONS
 		KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
 		KEEP (*(SORT(.ctors.*)))
 		KEEP (*(.ctors))
-		/*. = ALIGN(4);    REQUIRED. LD is flaky without it. */
+		. = ALIGN(4);   /* REQUIRED. LD is flaky without it. */
 	} >memregion = 0xff
 
-	.dtors : ALIGN(0x1000)
+	.dtors :
 	{
 		KEEP (*crtbegin.o(.dtors))
 		KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
 		KEEP (*(SORT(.dtors.*)))
 		KEEP (*(.dtors))
-		/*. = ALIGN(4);    REQUIRED. LD is flaky without it. */
+		. = ALIGN(4);   /* REQUIRED. LD is flaky without it. */
 	} >memregion = 0xff
 
-	.eh_frame : ALIGN(0x1000)
+	.eh_frame :
 	{
 		KEEP (*(.eh_frame))
-		/*. = ALIGN(4);    REQUIRED. LD is flaky without it. */
+		. = ALIGN(4);   /* REQUIRED. LD is flaky without it. */
 	} >memregion = 0xff
 
-	.gcc_except_table : ALIGN(0x1000)
+	.gcc_except_table :
 	{
 		*(.gcc_except_table)
-		/*. = ALIGN(4);    REQUIRED. LD is flaky without it. */
+		. = ALIGN(4);   /* REQUIRED. LD is flaky without it. */
 	} >memregion = 0xff
 	.jcr            : { KEEP (*(.jcr)) } >memregion = 0
 
@@ -150,7 +151,7 @@ SECTIONS
 
 
 
-	.bss ALIGN(0x1000) :
+	.bss ALIGN(4) :
 	{
 		__bss_start = ABSOLUTE(.);
 		__bss_start__ = ABSOLUTE(.);
@@ -158,7 +159,7 @@ SECTIONS
 		*(.gnu.linkonce.b*)
 		*(.bss*)
 		*(COMMON)
-		/*. = ALIGN(4);     REQUIRED. LD is flaky without it. */
+		. = ALIGN(4);    /* REQUIRED. LD is flaky without it. */
 	} >memregion :bss
 
 	__bss_end = . ;
