@@ -1,6 +1,7 @@
 #include "chip-8.h"
 #include <malloc.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
 
@@ -19,7 +20,7 @@ static const uint8_t chip8_font[] = {
 
 void chip8_init(struct chip8_context *ctx, uint8_t display_w, uint8_t display_h)
 {
-    ctx->disp_mem = malloc((display_w * display_h)/8);
+    //ctx->disp_mem = malloc((display_w * display_h)/8);
     ctx->disp_w = display_w;
     ctx->disp_h = display_h;
     chip8_reset(ctx);
@@ -39,8 +40,8 @@ void chip8_reset(struct chip8_context *ctx)
 
 void chip8_fini(struct chip8_context *ctx)
 {
-    if (ctx->disp_mem)
-        free(ctx->disp_mem);
+    //if (ctx->disp_mem)
+        //free(ctx->disp_mem);
 }
 
 void chip8_step(struct chip8_context *ctx)
@@ -297,21 +298,9 @@ void chip8_key_release(struct chip8_context *ctx, uint8_t key)
     }
 }
 
-int chip8_loadrom(struct chip8_context *ctx, char *path)
-{
-    FILE *fp = fopen(path, "rb");
-    if (!fp) return 0;
-    fseek(fp, 0, SEEK_END);
-    long int size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    long read = fread(&(ctx->RAM[0x200]), 1, size, fp);
-    fclose(fp);
-    return (size == read);
-}
-
 void chip8_core_dump(struct chip8_context *ctx)
 {
-    printf("Registers:\n");
+    /*printf("Registers:\n");
     printf("  V0: 0x%02X  V1: 0x%02X  V2: 0x%02X  V3: 0x%02X\n",
         ctx->regs.V[0], ctx->regs.V[1], ctx->regs.V[2], ctx->regs.V[3]);
     printf("  V4: 0x%02X  V5: 0x%02X  V6: 0x%02X  V7: 0x%02X\n",
@@ -322,6 +311,6 @@ void chip8_core_dump(struct chip8_context *ctx)
         ctx->regs.V[0xC], ctx->regs.V[0xD], ctx->regs.V[0xE], ctx->regs.V[0xF]);
     printf("  I: 0x%04X  PC: 0x%04X  SP: 0x%02X  DT: 0x%02X  ST: 0x%02X\n",
         ctx->regs.I, ctx->regs.PC, ctx->regs.SP, ctx->regs.DT, ctx->regs.ST);
-    
+    */
 }
 

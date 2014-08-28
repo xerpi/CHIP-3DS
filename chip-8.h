@@ -1,7 +1,7 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
-#include <stdint.h>
+#include <ctr/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +22,7 @@ struct chip8_context {
     
     uint16_t keyboard, old_keyboard;
     
-    uint8_t *disp_mem;
+    uint8_t disp_mem[256];
     uint8_t disp_w;
     uint8_t disp_h;
 };
@@ -34,7 +34,6 @@ void chip8_step(struct chip8_context *ctx);
 void chip8_cls(struct chip8_context *ctx);
 void chip8_key_press(struct chip8_context *ctx, uint8_t key);
 void chip8_key_release(struct chip8_context *ctx, uint8_t key);
-int  chip8_loadrom(struct chip8_context *ctx, char *path);
 void chip8_core_dump(struct chip8_context *ctx);
 
 #ifdef __cplusplus
