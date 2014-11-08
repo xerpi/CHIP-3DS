@@ -8,23 +8,23 @@ extern "C" {
 #endif
 
 struct chip8_context {
-    struct {
-        uint8_t  V[16];
-        uint16_t I;
-        uint16_t PC;
-        uint8_t  SP;
-        uint8_t  DT;
-        uint8_t  ST;
-    } regs;
-    
-    uint8_t RAM[0xFFF];
-    uint16_t stack[16];
-    
-    uint16_t keyboard, old_keyboard;
-    
-    uint8_t *disp_mem;
-    uint8_t disp_w;
-    uint8_t disp_h;
+	struct {
+		uint8_t	 V[16];
+		uint16_t I;
+		uint16_t PC;
+		uint8_t	 SP;
+		uint8_t	 DT;
+		uint8_t	 ST;
+	} regs;
+	
+	uint8_t RAM[0xFFF];
+	uint16_t stack[16];
+	
+	uint16_t keyboard, old_keyboard;
+	
+	uint8_t *disp_mem;
+	uint8_t disp_w;
+	uint8_t disp_h;
 };
 
 void chip8_init(struct chip8_context *ctx, uint8_t display_w, uint8_t display_h);

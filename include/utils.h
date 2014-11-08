@@ -9,11 +9,11 @@
 #define SCREEN_TOP_H (240)
 #define SCREEN_BOT_W (320)
 #define SCREEN_BOT_H (240)
-#define RED    0xFF0000
-#define GREEN  0x00FF00
-#define BLUE   0x0000FF
-#define BLACK  0x000000
-#define WHITE  0xFFFFFF
+#define RED	0xFF0000
+#define GREEN	0x00FF00
+#define BLUE	0x0000FF
+#define BLACK	0x000000
+#define WHITE	0xFFFFFF
 
 #ifdef __cplusplus
 extern "C" {

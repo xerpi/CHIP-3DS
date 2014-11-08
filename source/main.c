@@ -10,21 +10,21 @@ u8 *framebuf_bot = NULL;
 
 void chip8_disp_to_buf(struct chip8_context *ctx, unsigned char *buffer, int x_pos, int y_pos)
 {
-    int x, y;
-    for (y = 0; y < ctx->disp_h; y++) {
-        for (x = 0; x < ctx->disp_w; x++) {
+	int x, y;
+	for (y = 0; y < ctx->disp_h; y++) {
+		for (x = 0; x < ctx->disp_w; x++) {
 			//"Normal" coordinates
-            //unsigned char *p = (unsigned char *)(buffer + (SCREEN_TOP_H-(y+y_pos)-1)*3 +(x+x_pos)*3*SCREEN_TOP_H);
+			//unsigned char *p = (unsigned char *)(buffer + (SCREEN_TOP_H-(y+y_pos)-1)*3 +(x+x_pos)*3*SCREEN_TOP_H);
 			//3DS coordinates
 			unsigned char *p = (unsigned char *)(buffer + (((ctx->disp_h-y)+y_pos) +(x+x_pos)*SCREEN_TOP_H)*3);
 			
-            unsigned int color = ((ctx->disp_mem[x/8 + (ctx->disp_w/8)*y]>>(7-x%8)) & 0b1) ? GREEN : BLUE;
-            p[0] = color & 0xFF;       //B
-            p[1] = (color>>8) & 0xFF;  //G
-            p[2] = (color>>16) & 0xFF; //R
-        } 
-    }
-    
+			unsigned int color = ((ctx->disp_mem[x/8 + (ctx->disp_w/8)*y]>>(7-x%8)) & 0b1) ? GREEN : BLUE;
+			p[0] = color & 0xFF;	   //B
+			p[1] = (color>>8) & 0xFF;  //G
+			p[2] = (color>>16) & 0xFF; //R
+		} 
+	}
+	
 }
 
 int main()
