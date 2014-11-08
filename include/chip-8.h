@@ -22,7 +22,7 @@ struct chip8_context {
     
     uint16_t keyboard, old_keyboard;
     
-    uint8_t disp_mem[256];
+    uint8_t *disp_mem;
     uint8_t disp_w;
     uint8_t disp_h;
 };

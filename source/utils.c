@@ -13,7 +13,7 @@ int chip8_loadrom(struct chip8_context *ctx, char *path)
     return 0;
 }
 
-int chip8_loadrom_memory(struct chip8_context *ctx, void *addr, unsigned int size)
+int chip8_loadrom_memory(struct chip8_context *ctx, const void *addr, unsigned int size)
 {
     memcpy(&(ctx->RAM[0x200]), addr, size);
     return size;

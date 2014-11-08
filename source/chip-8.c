@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#include "tinyfont.h"
+#include "utils.h"
 
 
 #define FONT_OFFSET 0
@@ -20,7 +22,7 @@ static const uint8_t chip8_font[] = {
 
 void chip8_init(struct chip8_context *ctx, uint8_t display_w, uint8_t display_h)
 {
-    //ctx->disp_mem = malloc((display_w * display_h)/8);
+    ctx->disp_mem = malloc((display_w * display_h)/8);
     ctx->disp_w = display_w;
     ctx->disp_h = display_h;
     chip8_reset(ctx);
@@ -40,8 +42,8 @@ void chip8_reset(struct chip8_context *ctx)
 
 void chip8_fini(struct chip8_context *ctx)
 {
-    //if (ctx->disp_mem)
-        //free(ctx->disp_mem);
+    if (ctx->disp_mem)
+        free(ctx->disp_mem);
 }
 
 void chip8_step(struct chip8_context *ctx)
@@ -298,19 +300,17 @@ void chip8_key_release(struct chip8_context *ctx, uint8_t key)
     }
 }
 
+#define DEBUG(...) tinyfont_draw_stringf(GFX_BOTTOM, 10, SCREEN_BOT_H - (y+=15), GREEN, __VA_ARGS__);
+
 void chip8_core_dump(struct chip8_context *ctx)
 {
-    /*printf("Registers:\n");
-    printf("  V0: 0x%02X  V1: 0x%02X  V2: 0x%02X  V3: 0x%02X\n",
-        ctx->regs.V[0], ctx->regs.V[1], ctx->regs.V[2], ctx->regs.V[3]);
-    printf("  V4: 0x%02X  V5: 0x%02X  V6: 0x%02X  V7: 0x%02X\n",
-        ctx->regs.V[4], ctx->regs.V[5], ctx->regs.V[6], ctx->regs.V[7]);
-    printf("  V8: 0x%02X  V9: 0x%02X  VA: 0x%02X  VB: 0x%02X\n",
-        ctx->regs.V[8], ctx->regs.V[9], ctx->regs.V[0xA], ctx->regs.V[0xB]);
-    printf("  VC: 0x%02X  VD: 0x%02X  VE: 0x%02X  VF: 0x%02X\n",
-        ctx->regs.V[0xC], ctx->regs.V[0xD], ctx->regs.V[0xE], ctx->regs.V[0xF]);
-    printf("  I: 0x%04X  PC: 0x%04X  SP: 0x%02X  DT: 0x%02X  ST: 0x%02X\n",
-        ctx->regs.I, ctx->regs.PC, ctx->regs.SP, ctx->regs.DT, ctx->regs.ST);
-    */
+	int y = 0;
+	DEBUG("Registers:");
+	DEBUG("V0: 0x%02X  V1: 0x%02X  V2: 0x%02X  V3: 0x%02X", ctx->regs.V[0], ctx->regs.V[1], ctx->regs.V[2], ctx->regs.V[3]);
+	DEBUG("V4: 0x%02X  V5: 0x%02X  V6: 0x%02X  V7: 0x%02X", ctx->regs.V[4], ctx->regs.V[5], ctx->regs.V[6], ctx->regs.V[7]);
+	DEBUG("V8: 0x%02X  V9: 0x%02X  VA: 0x%02X  VB: 0x%02X", ctx->regs.V[8], ctx->regs.V[9], ctx->regs.V[0xA], ctx->regs.V[0xB]);
+	DEBUG("VC: 0x%02X  VD: 0x%02X  VE: 0x%02X  VF: 0x%02X", ctx->regs.V[0xC], ctx->regs.V[0xD], ctx->regs.V[0xE], ctx->regs.V[0xF]);
+	DEBUG("I: 0x%04X  PC: 0x%04X  SP: 0x%02X", ctx->regs.I, ctx->regs.PC, ctx->regs.SP);
+	DEBUG("DT: 0x%02X  ST: 0x%02X", ctx->regs.DT, ctx->regs.ST);
 }
 
