@@ -65,12 +65,13 @@ int main()
 	chip8_loadrom_memory(&chip8, PONG2_bin, PONG2_bin_size);
 	unsigned char disp_buf[chip8.disp_w*chip8.disp_h*3];
 	
-	u32 keys = 0, old_keys = 0;
+	u32 keys_down = 0, keys_up = 0;
 	
 	while (aptMainLoop()) {
 		gspWaitForVBlank();
 		hidScanInput();
-		keys = hidKeysDown();
+		keys_down = hidKeysDown();
+		keys_up = hidKeysUp();
 
 		framebuf_top = gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
 		framebuf_bot = gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL);
@@ -80,25 +81,25 @@ int main()
 		tinyfont_draw_stringf(GFX_TOP, 10, SCREEN_TOP_H - 20, WHITE, "CHIP-3DS by xerpi");
 		
 		
-		if ((keys & ~old_keys) & KEY_UP) {
+		if (keys_down & KEY_UP) {
 			chip8_key_press(&chip8, 1);
-		} else if ((~keys & old_keys) & KEY_UP) {
+		} else if (keys_up & KEY_UP) {
 			chip8_key_release(&chip8, 1);
 		}
-		if ((keys & ~old_keys) & KEY_DOWN) {
+		if (keys_down & KEY_DOWN) {
 			chip8_key_press(&chip8, 4);
-		} else if ((~keys & old_keys) & KEY_DOWN) {
+		} else if (keys_up & KEY_DOWN) {
 			chip8_key_release(&chip8, 4);
 		}
 		
-		if ((keys & ~old_keys) & KEY_X) {
+		if (keys_down & KEY_X) {
 			chip8_key_press(&chip8, 0xC);
-		} else if ((~keys & old_keys) & KEY_X) {
+		} else if (keys_up & KEY_X) {
 			chip8_key_release(&chip8, 0xC);
 		}
-		if ((keys & ~old_keys) & KEY_B) {
+		if (keys_down & KEY_B) {
 			chip8_key_press(&chip8, 0xD);
-		} else if ((~keys & old_keys) & KEY_B) {
+		} else if (keys_up & KEY_B) {
 			chip8_key_release(&chip8, 0xD);
 		}
 		
@@ -114,7 +115,6 @@ int main()
 
 		gfxFlushBuffers();
 		gfxSwapBuffers();
-		old_keys = keys;
 	}
 
 	chip8_fini(&chip8);
