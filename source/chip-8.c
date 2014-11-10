@@ -300,7 +300,7 @@ void chip8_key_release(struct chip8_context *ctx, uint8_t key)
 	}
 }
 
-#define DEBUG(...) tinyfont_draw_stringf(GFX_BOTTOM, 10, SCREEN_BOT_H - (y+=15), GREEN, __VA_ARGS__);
+#define DEBUG(...) tinyfont_draw_stringf(GFX_BOTTOM, 10, SCREEN_BOT_H - (y+=15), WHITE, __VA_ARGS__);
 
 void chip8_core_dump(struct chip8_context *ctx)
 {

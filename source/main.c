@@ -8,21 +8,47 @@
 u8 *framebuf_top = NULL;
 u8 *framebuf_bot = NULL;
 
-void chip8_disp_to_buf(struct chip8_context *ctx, unsigned char *buffer, int x_pos, int y_pos)
+void chip8_disp_to_buf(struct chip8_context *ctx, unsigned char *buffer)
 {
 	int x, y;
 	for (y = 0; y < ctx->disp_h; y++) {
 		for (x = 0; x < ctx->disp_w; x++) {
-			//"Normal" coordinates
-			//unsigned char *p = (unsigned char *)(buffer + (SCREEN_TOP_H-(y+y_pos)-1)*3 +(x+x_pos)*3*SCREEN_TOP_H);
-			//3DS coordinates
-			unsigned char *p = (unsigned char *)(buffer + (((ctx->disp_h-y)+y_pos) +(x+x_pos)*SCREEN_TOP_H)*3);
+			//"Normal" RGB texture
+			unsigned char *p = (unsigned char *)(buffer + (x + y*ctx->disp_w)*3);
+			//3DS texture
+			//unsigned char *p = (unsigned char *)(buffer + ((ctx->disp_h-y) + x*ctx->disp_w)*3);
 			
 			unsigned int color = ((ctx->disp_mem[x/8 + (ctx->disp_w/8)*y]>>(7-x%8)) & 0b1) ? GREEN : BLUE;
-			p[0] = color & 0xFF;	   //B
-			p[1] = (color>>8) & 0xFF;  //G
-			p[2] = (color>>16) & 0xFF; //R
+			p[0] = (color>>16) & 0xFF;	//R
+			p[1] = (color>>8) & 0xFF;	//G
+			p[2] = color & 0xFF;		//B
 		} 
+	}
+	
+}
+
+#define draw_plot(buf,buf_w,x,y,r,g,b) \
+	do { \
+		buf[((y) + (x)*(buf_w))*3 + 0] = b; \
+		buf[((y) + (x)*(buf_w))*3 + 1] = g; \
+		buf[((y) + (x)*(buf_w))*3 + 2] = r; \
+	} while (0)
+
+void blit_scale_x2(gfxScreen_t screen, unsigned char *buffer, int x, int y, int w, int h)
+{
+	u16 fbwidth;
+	unsigned char *framebuf1 = gfxGetFramebuffer(screen, GFX_LEFT, &fbwidth, NULL);
+	int i, j;
+	for (i = 0; i < w; i++) {
+		for (j = 0; j < h; j++) {
+				unsigned char r = buffer[(i + j*w)*3 + 0];
+				unsigned char g = buffer[(i + j*w)*3 + 1];
+				unsigned char b = buffer[(i + j*w)*3 + 2];
+				draw_plot(framebuf1, fbwidth, x+i*2 + 0, y+(h-j-1)*2 + 0, r, g, b);
+				draw_plot(framebuf1, fbwidth, x+i*2 + 1, y+(h-j-1)*2 + 0, r, g, b);
+				draw_plot(framebuf1, fbwidth, x+i*2 + 0, y+(h-j-1)*2 + 1, r, g, b);
+				draw_plot(framebuf1, fbwidth, x+i*2 + 1, y+(h-j-1)*2 + 1, r, g, b);
+		}
 	}
 	
 }
@@ -35,10 +61,14 @@ int main()
 	hidInit(NULL);
 	gfxInit();
 
+	#define CHIP8_DISP_W 64
+	#define CHIP8_DISP_H 32
+	
 	struct chip8_context chip8;
-	chip8_init(&chip8, 64, 32);
+	chip8_init(&chip8, CHIP8_DISP_W, CHIP8_DISP_H);
 	chip8_loadrom_memory(&chip8, PONG2_bin, PONG2_bin_size);
-
+	unsigned char disp_buf[chip8.disp_w*chip8.disp_h*3];
+	
 	while (aptMainLoop()) {
 		gspWaitForVBlank();
 		hidScanInput();
@@ -48,11 +78,17 @@ int main()
 
 		memset(framebuf_top, 0x00, 240*400*3);
 		memset(framebuf_bot, 0x00, 240*320*3);
-		tinyfont_draw_stringf(GFX_TOP, 10, SCREEN_TOP_H - 20, GREEN, "CHIP-3DS by xerpi");
+		tinyfont_draw_stringf(GFX_TOP, 10, SCREEN_TOP_H - 20, WHITE, "CHIP-3DS by xerpi");
 
 		chip8_step(&chip8);
 		chip8_core_dump(&chip8);
-		chip8_disp_to_buf(&chip8, framebuf_top, SCREEN_TOP_W/2 - chip8.disp_w/2, SCREEN_TOP_H/2 - chip8.disp_h/2);
+		
+		chip8_disp_to_buf(&chip8, disp_buf);
+		blit_scale_x2(GFX_TOP, disp_buf,
+			SCREEN_TOP_W/2 - (chip8.disp_w/2)*2,
+			SCREEN_TOP_H/2 - (chip8.disp_h/2)*2,
+			chip8.disp_w,
+			chip8.disp_h);
 
 		gfxFlushBuffers();
 		gfxSwapBuffers();
