@@ -41,16 +41,15 @@ void blit_scale_x2(gfxScreen_t screen, unsigned char *buffer, int x, int y, int 
 	int i, j;
 	for (i = 0; i < w; i++) {
 		for (j = 0; j < h; j++) {
-				unsigned char r = buffer[(i + j*w)*3 + 0];
-				unsigned char g = buffer[(i + j*w)*3 + 1];
-				unsigned char b = buffer[(i + j*w)*3 + 2];
-				draw_plot(framebuf1, fbwidth, x+i*2 + 0, y+(h-j-1)*2 + 0, r, g, b);
-				draw_plot(framebuf1, fbwidth, x+i*2 + 1, y+(h-j-1)*2 + 0, r, g, b);
-				draw_plot(framebuf1, fbwidth, x+i*2 + 0, y+(h-j-1)*2 + 1, r, g, b);
-				draw_plot(framebuf1, fbwidth, x+i*2 + 1, y+(h-j-1)*2 + 1, r, g, b);
+			unsigned char r = buffer[(i + j*w)*3 + 0];
+			unsigned char g = buffer[(i + j*w)*3 + 1];
+			unsigned char b = buffer[(i + j*w)*3 + 2];
+			draw_plot(framebuf1, fbwidth, x+i*2 + 0, y+(h-j-1)*2 + 0, r, g, b);
+			draw_plot(framebuf1, fbwidth, x+i*2 + 1, y+(h-j-1)*2 + 0, r, g, b);
+			draw_plot(framebuf1, fbwidth, x+i*2 + 0, y+(h-j-1)*2 + 1, r, g, b);
+			draw_plot(framebuf1, fbwidth, x+i*2 + 1, y+(h-j-1)*2 + 1, r, g, b);
 		}
 	}
-	
 }
 
 int main()
@@ -61,17 +60,17 @@ int main()
 	hidInit(NULL);
 	gfxInit();
 
-	#define CHIP8_DISP_W 64
-	#define CHIP8_DISP_H 32
-	
 	struct chip8_context chip8;
-	chip8_init(&chip8, CHIP8_DISP_W, CHIP8_DISP_H);
+	chip8_init(&chip8, 64, 32);
 	chip8_loadrom_memory(&chip8, PONG2_bin, PONG2_bin_size);
 	unsigned char disp_buf[chip8.disp_w*chip8.disp_h*3];
+	
+	u32 keys = 0, old_keys = 0;
 	
 	while (aptMainLoop()) {
 		gspWaitForVBlank();
 		hidScanInput();
+		keys = hidKeysDown();
 
 		framebuf_top = gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
 		framebuf_bot = gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL);
@@ -79,7 +78,30 @@ int main()
 		memset(framebuf_top, 0x00, 240*400*3);
 		memset(framebuf_bot, 0x00, 240*320*3);
 		tinyfont_draw_stringf(GFX_TOP, 10, SCREEN_TOP_H - 20, WHITE, "CHIP-3DS by xerpi");
-
+		
+		
+		if ((keys & ~old_keys) & KEY_UP) {
+			chip8_key_press(&chip8, 1);
+		} else if ((~keys & old_keys) & KEY_UP) {
+			chip8_key_release(&chip8, 1);
+		}
+		if ((keys & ~old_keys) & KEY_DOWN) {
+			chip8_key_press(&chip8, 4);
+		} else if ((~keys & old_keys) & KEY_DOWN) {
+			chip8_key_release(&chip8, 4);
+		}
+		
+		if ((keys & ~old_keys) & KEY_X) {
+			chip8_key_press(&chip8, 0xC);
+		} else if ((~keys & old_keys) & KEY_X) {
+			chip8_key_release(&chip8, 0xC);
+		}
+		if ((keys & ~old_keys) & KEY_B) {
+			chip8_key_press(&chip8, 0xD);
+		} else if ((~keys & old_keys) & KEY_B) {
+			chip8_key_release(&chip8, 0xD);
+		}
+		
 		chip8_step(&chip8);
 		chip8_core_dump(&chip8);
 		
@@ -92,6 +114,7 @@ int main()
 
 		gfxFlushBuffers();
 		gfxSwapBuffers();
+		old_keys = keys;
 	}
 
 	chip8_fini(&chip8);
