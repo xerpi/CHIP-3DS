@@ -130,9 +130,13 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf
+	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).3ds
 
+cci: $(BUILD)
+	$(STRIP) $(TARGET).elf
+	$(DEVKITARM)/bin/makerom -f cci -rsf resources/gw_workaround.rsf -target d -exefslogo -elf $(TARGET).elf -icon resources/icon.bin -banner resources/banner.bin -o $(TARGET).3ds
 
+	
 #---------------------------------------------------------------------------------
 else
 
