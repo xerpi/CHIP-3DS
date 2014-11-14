@@ -37,6 +37,11 @@ SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 
+APP_TITLE		:= CHIP-3DS
+APP_DESCRIPTION	:= CHIP-8 emulator for the 3DS
+APP_AUTHOR		:= xerpi
+ICON			:= resources/icon.png
+
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
@@ -134,7 +139,7 @@ clean:
 
 cci: $(BUILD)
 	$(STRIP) $(TARGET).elf -o $(TARGET)-strip.elf
-	$(DEVKITARM)/bin/makerom -f cci -rsf resources/gw_workaround.rsf -target d -exefslogo -elf $(TARGET)-strip.elf -icon resources/icon.bin -banner resources/banner.bin -o $(TARGET).3ds
+	$(DEVKITARM)/bin/makerom -f cci -rsf resources/CHIP-3DS.rsf -target d -exefslogo -elf $(TARGET)-strip.elf -icon $(TARGET).smdh -banner resources/banner.bin -o $(TARGET).3ds
 
 	
 #---------------------------------------------------------------------------------
