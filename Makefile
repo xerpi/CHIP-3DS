@@ -135,13 +135,14 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).3ds $(TARGET)-strip.elf
+	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(TARGET).3ds $(TARGET).cia $(TARGET)-strip.elf
 
-cci: $(BUILD)
+$(TARGET)-strip.elf: $(BUILD)
 	$(STRIP) $(TARGET).elf -o $(TARGET)-strip.elf
-	$(DEVKITARM)/bin/makerom -f cci -rsf resources/CHIP-3DS.rsf -target d -exefslogo -elf $(TARGET)-strip.elf -icon $(TARGET).smdh -banner resources/banner.bin -o $(TARGET).3ds
-
-	
+cci: $(TARGET)-strip.elf
+	$(DEVKITARM)/bin/makerom -f cci -rsf resources/CHIP-3DS.rsf -target d -exefslogo -elf $(TARGET)-strip.elf -icon resources/icon.bin -banner resources/banner.bin -o $(TARGET).3ds
+cia: $(TARGET)-strip.elf
+	$(DEVKITARM)/bin/makerom -f cia -o $(TARGET).cia -elf $(TARGET)-strip.elf -rsf resources/build_cia.rsf -icon resources/icon.bin -banner resources/banner.bin -exefslogo -target t
 #---------------------------------------------------------------------------------
 else
 
