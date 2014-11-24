@@ -8,49 +8,6 @@
 u8 *framebuf_top = NULL;
 u8 *framebuf_bot = NULL;
 
-void chip8_disp_to_buf(struct chip8_context *ctx, unsigned char *buffer)
-{
-	int x, y;
-	for (y = 0; y < ctx->disp_h; y++) {
-		for (x = 0; x < ctx->disp_w; x++) {
-			//"Normal" RGB texture
-			unsigned char *p = (unsigned char *)(buffer + (x + y*ctx->disp_w)*3);
-			//3DS texture
-			//unsigned char *p = (unsigned char *)(buffer + ((ctx->disp_h-y) + x*ctx->disp_w)*3);
-			
-			unsigned int color = ((ctx->disp_mem[x/8 + (ctx->disp_w/8)*y]>>(7-x%8)) & 0b1) ? GREEN : BLUE;
-			p[0] = (color>>16) & 0xFF;	//R
-			p[1] = (color>>8) & 0xFF;	//G
-			p[2] = color & 0xFF;		//B
-		} 
-	}
-}
-
-#define draw_plot(buf,buf_w,x,y,r,g,b) \
-	do { \
-		buf[((y) + (x)*(buf_w))*3 + 0] = b; \
-		buf[((y) + (x)*(buf_w))*3 + 1] = g; \
-		buf[((y) + (x)*(buf_w))*3 + 2] = r; \
-	} while (0)
-
-void blit_scale(gfxScreen_t screen, unsigned char *buffer, int x, int y, int w, int h, int scale)
-{
-	u16 fbwidth;
-	unsigned char *framebuf1 = gfxGetFramebuffer(screen, GFX_LEFT, &fbwidth, NULL);
-	int i, j;
-	for (i = 0; i < w; i++) {
-		for (j = 0; j < h; j++) {
-			unsigned char *src_ptr = buffer + (i + j*w)*3;
-			int i2, j2;
-			for (i2 = 0; i2 < scale; i2++) {
-				for (j2 = 0; j2 < scale; j2++) {
-					draw_plot(framebuf1, fbwidth, x+i*scale + i2, y+(h-j-1)*scale + j2, src_ptr[0], src_ptr[1], src_ptr[2]);
-				}
-			}
-		}
-	}
-}
-
 int main()
 {
 	srand(time(NULL));
@@ -75,6 +32,8 @@ int main()
 		hidScanInput();
 		keys_down = hidKeysDown();
 		keys_up = hidKeysUp();
+
+		if (keys_down & KEY_START) break;
 
 		framebuf_top = gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
 		framebuf_bot = gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL);
@@ -106,7 +65,10 @@ int main()
 			chip8_key_release(&chip8, 0xD);
 		}
 		
-		chip8_step(&chip8);
+		int i;
+		for (i = 0; i < 10; i++) {
+			chip8_step(&chip8);
+		}
 		chip8_core_dump(&chip8);
 
 		chip8_disp_to_buf(&chip8, disp_buf);
