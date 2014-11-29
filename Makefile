@@ -140,9 +140,9 @@ clean:
 $(TARGET)-strip.elf: $(BUILD)
 	$(STRIP) $(TARGET).elf -o $(TARGET)-strip.elf
 cci: $(TARGET)-strip.elf
-	$(DEVKITARM)/bin/makerom -f cci -rsf resources/CHIP-3DS.rsf -target d -exefslogo -elf $(TARGET)-strip.elf -icon resources/icon.bin -banner resources/banner.bin -o $(TARGET).3ds
+	$(DEVKITARM)/bin/makerom -f cci -rsf resources/$(TARGET).rsf -target d -exefslogo -elf $(TARGET)-strip.elf -icon resources/icon.bin -banner resources/banner.bin -o $(TARGET).3ds
 cia: $(TARGET)-strip.elf
-	$(DEVKITARM)/bin/makerom -f cia -o $(TARGET).cia -elf $(TARGET)-strip.elf -rsf resources/build_cia.rsf -icon resources/icon.bin -banner resources/banner.bin -exefslogo -target t
+	$(DEVKITARM)/bin/makerom -f cia -o $(TARGET).cia -elf $(TARGET)-strip.elf -rsf resources/$(TARGET).rsf -icon resources/icon.bin -banner resources/banner.bin -exefslogo -target t
 #---------------------------------------------------------------------------------
 else
 
