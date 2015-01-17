@@ -1,4 +1,6 @@
 #include <3ds.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "chip-8.h"
 #include "utils.h"
@@ -11,10 +13,7 @@ u8 *framebuf_bot = NULL;
 int main()
 {
 	srand(time(NULL));
-	srvInit();
-	aptInit();
-	hidInit(NULL);
-	gfxInit();
+	gfxInitDefault();
 
 	struct chip8_context chip8;
 	chip8_init(&chip8, 64, 32);
@@ -85,8 +84,5 @@ int main()
 
 	chip8_fini(&chip8);
 	gfxExit();
-	hidExit();
-	aptExit();
-	srvExit();
 	return 0;
 }

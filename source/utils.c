@@ -1,3 +1,4 @@
+#include <string.h>
 #include "utils.h"
 
 int chip8_loadrom(struct chip8_context *ctx, char *path)

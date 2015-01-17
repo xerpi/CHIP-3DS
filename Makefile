@@ -6,11 +6,6 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-ifeq ($(strip $(CTRULIB)),)
-# THIS IS TEMPORARY - in the future it should be at $(DEVKITPRO)/libctru
-$(error "Please set CTRULIB in your environment. export CTRULIB=<path to>libctru")
-endif
-
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
@@ -26,10 +21,10 @@ include $(DEVKITARM)/3ds_rules
 # APP_DESCRIPTION is the description of the app stored in the SMDH file (Optional)
 # APP_AUTHOR is the author of the app stored in the SMDH file (Optional)
 # ICON is the filename of the icon (.png), relative to the project folder.
-#	If not set, it attempts to use one of the following (in this order):
-#	  - <Project name>.png
-#	  - icon.png
-#	  - <libctru folder>/default_icon.png
+#   If not set, it attempts to use one of the following (in this order):
+#     - <Project name>.png
+#     - icon.png
+#     - <libctru folder>/default_icon.png
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
