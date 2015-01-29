@@ -7,6 +7,10 @@
 extern "C" {
 #endif
 
+#define CHIP8_RAM_SIZE      (0xFFF)
+#define CHIP8_ROM_LOAD_ADDR (0x200)
+#define CHIP8_ROM_MAX_SIZE  (CHIP8_RAM_SIZE-CHIP8_ROM_LOAD_ADDR)
+
 struct chip8_context {
 	struct {
 		uint8_t	 V[16];
@@ -17,7 +21,7 @@ struct chip8_context {
 		uint8_t	 ST;
 	} regs;
 	
-	uint8_t RAM[0xFFF];
+	uint8_t RAM[CHIP8_RAM_SIZE];
 	uint16_t stack[16];
 	
 	uint16_t keyboard, old_keyboard;

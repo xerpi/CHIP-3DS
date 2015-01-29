@@ -1,17 +1,27 @@
 #include <string.h>
 #include "utils.h"
 
-int chip8_loadrom(struct chip8_context *ctx, char *path)
+int chip8_loadrom_file(struct chip8_context *ctx, const char *path)
 {
-	/*FILE *fp = fopen(path, "rb");
-	if (!fp) return 0;
-	fseek(fp, 0, SEEK_END);
-	long int size = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-	long read = fread(&(ctx->RAM[0x200]), 1, size, fp);
-	fclose(fp);
-	return (size == read);*/
-	return 0;
+	FS_archive archive = {
+		ARCH_SDMC,
+		(FS_path) {
+			PATH_EMPTY,
+			1,
+			(u8 *)""
+		}
+	};
+    FS_path fs_path = FS_makePath(PATH_CHAR, path);
+  
+    Handle fh;  
+    Result ret = FSUSER_OpenFileDirectly(NULL, &fh, archive, fs_path, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
+    if (ret) return 0;
+   
+	FSFILE_Read(fh, NULL, 0, &(ctx->RAM[CHIP8_ROM_LOAD_ADDR]), CHIP8_ROM_MAX_SIZE);
+	
+	FSFILE_Close(fh);
+	svcCloseHandle(fh);
+	return 1;
 }
 
 int chip8_loadrom_memory(struct chip8_context *ctx, const void *addr, unsigned int size)

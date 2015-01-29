@@ -34,7 +34,7 @@ void chip8_reset(struct chip8_context *ctx)
 	memcpy(ctx->RAM+FONT_OFFSET, chip8_font, sizeof(chip8_font));
 	memset(ctx->stack, 0, sizeof(ctx->stack));
 	memset(&ctx->regs, 0, sizeof(ctx->regs));
-	ctx->regs.PC = 0x200;
+	ctx->regs.PC = CHIP8_ROM_LOAD_ADDR;
 	ctx->regs.SP = 0;
 	ctx->keyboard = 0;
 	chip8_cls(ctx);

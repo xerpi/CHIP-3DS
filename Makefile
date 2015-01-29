@@ -138,6 +138,15 @@ cci: $(TARGET)-strip.elf
 	$(DEVKITARM)/bin/makerom -f cci -rsf resources/$(TARGET).rsf -target d -exefslogo -elf $(TARGET)-strip.elf -icon resources/icon.bin -banner resources/banner.bin -o $(TARGET).3ds
 cia: $(TARGET)-strip.elf
 	$(DEVKITARM)/bin/makerom -f cia -o $(TARGET).cia -elf $(TARGET)-strip.elf -rsf resources/$(TARGET).rsf -icon resources/icon.bin -banner resources/banner.bin -exefslogo -target t
+	
+copy: $(BUILD)
+	@cp $(TARGET).3dsx $(OUTPUT).smdh "/media/$(USER)/GATEWAYNAND/3ds/CHIP-3DS/"
+	@sync
+	@echo "Copied!"
+
+send: $(BUILD)
+	@nc 192.168.1.45 9000 < $(TARGET).3dsx
+	
 #---------------------------------------------------------------------------------
 else
 

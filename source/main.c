@@ -5,7 +5,6 @@
 #include "chip-8.h"
 #include "utils.h"
 #include "tinyfont.h"
-#include "PONG2_bin.h"
 
 u8 *framebuf_top = NULL;
 u8 *framebuf_bot = NULL;
@@ -13,11 +12,27 @@ u8 *framebuf_bot = NULL;
 int main()
 {
 	srand(time(NULL));
+	fsInit();
 	gfxInitDefault();
 
 	struct chip8_context chip8;
+	
 	chip8_init(&chip8, 64, 32);
-	chip8_loadrom_memory(&chip8, PONG2_bin, PONG2_bin_size);
+	if (!chip8_loadrom_file(&chip8, "/PONG2.bin")) {
+		while (aptMainLoop()) {
+			gspWaitForVBlank();
+			hidScanInput();
+			if (hidKeysDown() & KEY_START) break;
+			tinyfont_draw_stringf(GFX_TOP, 10, SCREEN_TOP_H - 14, RED, "ERROR loading file");
+			gfxFlushBuffers();
+			gfxSwapBuffers();
+		}
+		chip8_fini(&chip8);
+		gfxExit();
+		fsExit();
+		return 0;
+	}
+	
 	unsigned char disp_buf[chip8.disp_w*chip8.disp_h*3];
 	
 	#define SCALE 6
@@ -84,5 +99,6 @@ int main()
 
 	chip8_fini(&chip8);
 	gfxExit();
+	fsExit();
 	return 0;
 }
